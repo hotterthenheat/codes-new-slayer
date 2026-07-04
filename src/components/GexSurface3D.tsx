@@ -88,6 +88,11 @@ export function GexSurface3D({ expiries, spot, decimals = 0, ticker, live, windo
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x050507);
+
+    const width = mount.clientWidth || 800;
+    const height = mount.clientHeight || 460;
+
+    const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
     camera.position.copy(CAM_DEFAULT);
 
@@ -240,6 +245,12 @@ export function GexSurface3D({ expiries, spot, decimals = 0, ticker, live, windo
       const w = Math.max(320, mount.clientWidth || width), h = Math.max(260, mount.clientHeight || height);
       if (!Number.isFinite(w) || !Number.isFinite(h)) return;
       camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
+    const animate = () => { raf = requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); };
+    animate();
+
+    const onResize = () => {
+      const w = mount.clientWidth || width, h = mount.clientHeight || height;
+      camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
     };
     window.addEventListener('resize', onResize);
     document.addEventListener('fullscreenchange', onResize);
@@ -339,6 +350,7 @@ export function GexSurface3D({ expiries, spot, decimals = 0, ticker, live, windo
             <p className="mt-1 text-xs text-red-200/60">{renderError}</p>
           </div>
         )}
+      <div ref={mountRef} className="relative w-full h-[440px] cursor-grab active:cursor-grabbing" style={{ touchAction: 'none' }}>
         {hover && (
           <div
             className="pointer-events-none absolute z-10 px-2 py-1 rounded-md bg-[var(--surface-2)] border border-[var(--border)] text-[10px] tabular-nums shadow-lg"

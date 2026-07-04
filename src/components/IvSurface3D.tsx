@@ -17,6 +17,7 @@
  * PNG / CSV controls. Static data ⇒ the loop only advances controls and renders.
  */
 import { useEffect, useRef, useMemo, useState } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Download, Maximize2, RotateCcw } from 'lucide-react';
@@ -67,6 +68,12 @@ export function IvSurface3D({ chain, spot, frontDteDays, decimals = 0, ticker }:
     camera.position.copy(CAM_DEFAULT);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setClearColor(0x050507, 1);
+    const width = mount.clientWidth || 800, height = mount.clientHeight || 440;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
+    camera.position.copy(CAM_DEFAULT);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height);
     mount.appendChild(renderer.domElement);
@@ -176,6 +183,9 @@ export function IvSurface3D({ chain, spot, frontDteDays, decimals = 0, ticker }:
       if (!Number.isFinite(w) || !Number.isFinite(h)) return;
       camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
     };
+    const animate = () => { raf = requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); };
+    animate();
+    const onResize = () => { const w = mount.clientWidth || width, h = mount.clientHeight || height; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h); };
     window.addEventListener('resize', onResize);
     document.addEventListener('fullscreenchange', onResize);
 
@@ -239,6 +249,8 @@ export function IvSurface3D({ chain, spot, frontDteDays, decimals = 0, ticker }:
             <p className="mt-1 text-xs text-red-200/60">{renderError}</p>
           </div>
         )}
+      <div ref={mountRef} className="relative w-full h-[440px] cursor-grab active:cursor-grabbing" style={{ touchAction: 'none' }}>
+        <div ref={hoverRef} className="pointer-events-none absolute z-10 px-2 py-1 rounded-md bg-[var(--surface-2)] border border-[var(--border)] text-[10px] tabular-nums shadow-lg" style={{ display: 'none' }} />
       </div>
 
       <div className="flex items-center gap-4 px-3.5 py-2 border-t border-[var(--border)] text-[10px] text-[var(--text-tertiary)] flex-wrap">

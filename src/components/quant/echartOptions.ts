@@ -145,6 +145,10 @@ export function volSurfaceOption() {
       axisPointer: { lineStyle: { color: '#4ADE80' } },
       viewControl: { autoRotate: true, autoRotateSpeed: 8, distance: 200 },
       light: { main: { intensity: 1.1 }, ambient: { intensity: 0.35 } },
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.35)' } },
+      axisPointer: { lineStyle: { color: '#4ADE80' } },
+      viewControl: { autoRotate: true, autoRotateSpeed: 8, distance: 200 },
+      environment: 'transparent',
     },
     series: [{
       type: 'surface',
@@ -186,6 +190,7 @@ export function riskScatter3DOption() {
       axisLine: { lineStyle: { color: 'rgba(255,255,255,0.35)' } },
       axisLabel: { textStyle: { color: '#a1a1aa' } },
       splitLine: { lineStyle: { color: 'rgba(255,255,255,0.08)' } },
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.35)' } },
       axisPointer: { lineStyle: { color: '#4ADE80' } },
       viewControl: { distance: 220 },
     },

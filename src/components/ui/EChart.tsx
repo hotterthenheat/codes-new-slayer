@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * EChart — a thin, dark, self-disposing React wrapper around Apache ECharts.
@@ -96,6 +97,9 @@ export default function EChart({ option, gl, className, style, notMerge, onInit 
     },
   }), []);
 
+  const optionRef = useRef<OptionOrFactory>(option);
+  optionRef.current = option;
+
   // Init once (async so echarts code-splits). Re-init if `gl` toggles.
   useEffect(() => {
     let disposed = false;
@@ -127,6 +131,13 @@ export default function EChart({ option, gl, className, style, notMerge, onInit 
         if (!rect || rect.width <= 0 || rect.height <= 0 || !Number.isFinite(rect.width) || !Number.isFinite(rect.height)) return;
         chart.resize();
       });
+      const chart = echarts.init(elRef.current, 'slayer-dark', { renderer: 'canvas' });
+      echartsRef.current = echarts;
+      chartRef.current = chart;
+      const resolved = typeof optionRef.current === 'function' ? optionRef.current(echarts) : optionRef.current;
+      chart.setOption(resolved, { notMerge: true });
+      onInit?.(chart, echarts);
+      ro = new ResizeObserver(() => chart.resize());
       ro.observe(elRef.current);
     })();
     return () => {
@@ -138,6 +149,7 @@ export default function EChart({ option, gl, className, style, notMerge, onInit 
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gl, terminalOption]);
+  }, [gl]);
 
   // Apply option updates once the chart exists.
   useEffect(() => {
@@ -182,4 +194,9 @@ export default function EChart({ option, gl, className, style, notMerge, onInit 
       )}
     </div>
   );
+    const resolved = typeof option === 'function' ? option(echarts) : option;
+    chart.setOption(resolved, { notMerge: notMerge ?? false });
+  }, [option, notMerge]);
+
+  return <div ref={elRef} className={className} style={{ width: '100%', height: '100%', ...style }} />;
 }

@@ -4,6 +4,13 @@ import { useContractStore, ContractState } from '../lib/store';
 import { TradePlanCard } from './TradePlanCard';
 import { ASSET_LIST, optionExpiryLabel } from '../data';
 import { Zap, FileText, CheckCircle2, Layers, Target, Activity } from 'lucide-react';
+import PinpointTerminal from './PinpointTerminal';
+import PinpointChart from './PinpointChart';
+import { StrikeGravityPanel } from './StrikeGravityPanel';
+import { TradePlanCard } from './TradePlanCard';
+import { ASSET_LIST, optionExpiryLabel } from '../data';
+import { Zap, FileText, CheckCircle2, Maximize2, Minimize2, Layers, Target, Activity } from 'lucide-react';
+import { DiscoveryView } from './DiscoveryView';
 import { SkyVisionV2Panel } from './SkyVisionV2Panel';
 import { AssetSparkline } from './AssetSparkline';
 // Pure, client-safe math (no server-only deps): shared Black-Scholes greeks used
@@ -91,6 +98,7 @@ function OptionCard({ strikeLabel, health, move, price, action, isSelected, isCa
 }
 
 export function SkyVisionView() {
+  const [isChartExpanded, setIsChartExpanded] = useState(false);
   const selectedAsset = useContractStore(s => s.selectedAsset);
   const selectedOptionType = useContractStore(s => s.selectedOptionType);
   const selectedTimeframe = useContractStore(s => s.selectedTimeframe);
@@ -379,6 +387,13 @@ export function SkyVisionView() {
     ];
   }, [activePrice, tradeHealthValue]);
 
+  if (!isExpanded) {
+    // SkyVision's first page is the PinPoint GEX Flow Map (candles + GEX-node
+    // heatmap, the strike x expiry heatmap, and the multi-ticker flow board),
+    // reusing the same self-contained component as the terminal chart.
+    return <PinpointTerminal ticker={selectedAsset.ticker} />;
+  }
+
   return (
     <div className="w-full text-[var(--text-secondary)] flex flex-col font-mono select-none antialiased space-y-6">
 
@@ -391,6 +406,7 @@ export function SkyVisionView() {
           className="flex shrink-0 items-center gap-2 text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] uppercase tracking-widest font-black py-2 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded hover:bg-[var(--surface-3)] transition-colors focus-visible:ring-1 focus-visible:ring-[var(--border-strong)] focus:outline-none"
         >
           ← Clear Selected Contract
+          ← Back to Signals
         </button>
         <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-black tracking-wider tabular-nums truncate text-right">Selected: {selectedAsset.ticker} {activeStrike}{selectedOptionType}</span>
       </div>
@@ -400,6 +416,7 @@ export function SkyVisionView() {
         <div className="flex gap-2 items-center">
           <Zap className="w-4 h-4 text-[var(--success)]" />
           <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-widest font-black">SkysVision</span>
+          <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-widest font-black">Slayer Terminal</span>
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
@@ -449,6 +466,7 @@ export function SkyVisionView() {
       <SkyVisionV2Panel />
 
       {/* SKYSVISION TRADE PLAN — structured, actionable 0DTE synthesis (headline) */}
+      {/* SKY'S VISION TRADE PLAN — structured, actionable 0DTE synthesis (headline) */}
       <TradePlanCard />
 
       {/* =====================================================================
@@ -634,6 +652,9 @@ export function SkyVisionView() {
               );
             })}
           </div>
+
+          {/* STRIKE GRAVITY MAP — dealer-pressure ranking & zones */}
+          <StrikeGravityPanel />
 
           {/* ANALYSIS SUMMARY */}
           <div className="w-full bg-[var(--surface)] border border-[var(--border)] p-3 sm:p-5 rounded-xl text-left space-y-3">
@@ -996,6 +1017,32 @@ export function SkyVisionView() {
         <p className="mt-3 text-[11px] leading-relaxed text-[var(--text-tertiary)]">
           This page is the setup and contract-decision engine. Open the GEX Terminal for candles, strike heatmaps, dealer walls, and market-structure maps.
         </p>
+      {/* CHART */}
+      <div className="w-full mt-2">
+
+        <div className="w-full bg-[var(--surface)] border border-[var(--border)] p-3 sm:p-5 rounded-xl space-y-3">
+          <div className="flex justify-between items-center pb-2.5 border-b border-[var(--border)]">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)] flex items-center gap-2">
+              <Activity className="w-3.5 h-3.5 text-[var(--success)]" /> Live Chart
+            </span>
+            <button
+              onClick={() => setIsChartExpanded(!isChartExpanded)}
+              className="-m-2 p-2 inline-flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors focus-visible:ring-1 focus-visible:ring-[var(--border-strong)] focus:outline-none"
+              title={isChartExpanded ? "Collapse Chart" : "Expand Chart"}
+              aria-label={isChartExpanded ? "Collapse chart" : "Expand chart"}
+            >
+              {isChartExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            </button>
+          </div>
+          <motion.div
+            animate={{ height: isChartExpanded ? 500 : 210 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="w-full relative"
+          >
+            <PinpointChart ticker={selectedAsset.ticker} timeframe={selectedTimeframe as any} height={isChartExpanded ? 480 : 190} />
+          </motion.div>
+        </div>
+
       </div>
 
     </div>
