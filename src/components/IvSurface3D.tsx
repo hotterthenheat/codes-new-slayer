@@ -16,6 +16,7 @@
  * readout (K · DTE · IV), camera-facing axis labels, and reset / fullscreen /
  * PNG / CSV controls. Static data ⇒ the loop only advances controls and renders.
  */
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { useEffect, useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -50,12 +51,23 @@ export function IvSurface3D({ chain, spot, frontDteDays, decimals = 0, ticker }:
   const wrapRef = useRef<HTMLDivElement>(null);
   const apiRef = useRef<SurfaceApi | null>(null);
   const hoverRef = useRef<HTMLDivElement>(null);
+  const [renderError, setRenderError] = useState<string | null>(null);
 
   const model = useMemo(() => buildIvSurfaceModel(chain, spot, frontDteDays), [chain, spot, frontDteDays]);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount || !model) return;
+    setRenderError(null);
+    mount.querySelectorAll('canvas').forEach((canvas) => canvas.remove());
+    const width = Math.max(320, mount.clientWidth || 800), height = Math.max(260, mount.clientHeight || 440);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050507);
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
+    camera.position.copy(CAM_DEFAULT);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setClearColor(0x050507, 1);
     const width = mount.clientWidth || 800, height = mount.clientHeight || 440;
 
     const scene = new THREE.Scene();
@@ -155,6 +167,22 @@ export function IvSurface3D({ chain, spot, frontDteDays, decimals = 0, ticker }:
     renderer.domElement.addEventListener('pointermove', onMove);
     renderer.domElement.addEventListener('pointerleave', onLeave);
 
+    const animate = () => {
+      raf = requestAnimationFrame(animate);
+      try {
+        controls.update();
+        renderer.render(scene, camera);
+      } catch (err) {
+        setRenderError(err instanceof Error ? err.message : 'Unknown WebGL render failure');
+        cancelAnimationFrame(raf);
+      }
+    };
+    animate();
+    const onResize = () => {
+      const w = Math.max(320, mount.clientWidth || width), h = Math.max(260, mount.clientHeight || height);
+      if (!Number.isFinite(w) || !Number.isFinite(h)) return;
+      camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
+    };
     const animate = () => { raf = requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); };
     animate();
     const onResize = () => { const w = mount.clientWidth || width, h = mount.clientHeight || height; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h); };
@@ -213,6 +241,14 @@ export function IvSurface3D({ chain, spot, frontDteDays, decimals = 0, ticker }:
         </div>
       </div>
 
+      <div ref={mountRef} className="relative w-full h-[440px] cursor-grab active:cursor-grabbing bg-zinc-950" style={{ touchAction: 'none', background: '#050507' }}>
+        <div ref={hoverRef} className="pointer-events-none absolute z-10 px-2 py-1 rounded-md bg-[var(--surface-2)] border border-[var(--border)] text-[10px] tabular-nums shadow-lg" style={{ display: 'none' }} />
+        {renderError && (
+          <div className="absolute inset-0 flex flex-col justify-center rounded-xl border border-red-500/20 bg-red-950/10 p-4">
+            <p className="text-sm font-medium text-red-300">Quant model failed to render</p>
+            <p className="mt-1 text-xs text-red-200/60">{renderError}</p>
+          </div>
+        )}
       <div ref={mountRef} className="relative w-full h-[440px] cursor-grab active:cursor-grabbing" style={{ touchAction: 'none' }}>
         <div ref={hoverRef} className="pointer-events-none absolute z-10 px-2 py-1 rounded-md bg-[var(--surface-2)] border border-[var(--border)] text-[10px] tabular-nums shadow-lg" style={{ display: 'none' }} />
       </div>

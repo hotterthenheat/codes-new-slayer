@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { useContractStore, ContractState } from '../lib/store';
+import { TradePlanCard } from './TradePlanCard';
+import { ASSET_LIST, optionExpiryLabel } from '../data';
+import { Zap, FileText, CheckCircle2, Layers, Target, Activity } from 'lucide-react';
 import PinpointTerminal from './PinpointTerminal';
 import PinpointChart from './PinpointChart';
 import { StrikeGravityPanel } from './StrikeGravityPanel';
@@ -402,6 +405,7 @@ export function SkyVisionView() {
           }}
           className="flex shrink-0 items-center gap-2 text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] uppercase tracking-widest font-black py-2 px-3 bg-[var(--surface-2)] border border-[var(--border)] rounded hover:bg-[var(--surface-3)] transition-colors focus-visible:ring-1 focus-visible:ring-[var(--border-strong)] focus:outline-none"
         >
+          ← Clear Selected Contract
           ← Back to Signals
         </button>
         <span className="text-[10px] text-[var(--text-tertiary)] uppercase font-black tracking-wider tabular-nums truncate text-right">Selected: {selectedAsset.ticker} {activeStrike}{selectedOptionType}</span>
@@ -411,6 +415,7 @@ export function SkyVisionView() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-[var(--surface)] border border-[var(--border)] p-3 rounded-lg gap-3">
         <div className="flex gap-2 items-center">
           <Zap className="w-4 h-4 text-[var(--success)]" />
+          <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-widest font-black">SkysVision</span>
           <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-widest font-black">Slayer Terminal</span>
         </div>
 
@@ -457,6 +462,10 @@ export function SkyVisionView() {
         </div>
       </div>
 
+      {/* SKYSVISION OVERVIEW — setup intelligence only; GEX/heatmaps live in the GEX Terminal. */}
+      <SkyVisionV2Panel />
+
+      {/* SKYSVISION TRADE PLAN — structured, actionable 0DTE synthesis (headline) */}
       {/* SKY'S VISION TRADE PLAN — structured, actionable 0DTE synthesis (headline) */}
       <TradePlanCard />
 
@@ -999,6 +1008,15 @@ export function SkyVisionView() {
         )}
       </div>
 
+      {/* Market-structure charts and GEX heatmaps live in the GEX Terminal. SkysVision stays focused on setup/contract decisions. */}
+      <div className="w-full mt-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+        <div className="flex items-center gap-2 border-b border-[var(--border)] pb-2.5">
+          <Activity className="w-3.5 h-3.5 text-[var(--success)]" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-secondary)]">SkysVision Scope</span>
+        </div>
+        <p className="mt-3 text-[11px] leading-relaxed text-[var(--text-tertiary)]">
+          This page is the setup and contract-decision engine. Open the GEX Terminal for candles, strike heatmaps, dealer walls, and market-structure maps.
+        </p>
       {/* CHART */}
       <div className="w-full mt-2">
 

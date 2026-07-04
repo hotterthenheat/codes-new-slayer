@@ -246,6 +246,7 @@ export default function App() {
         };
       case 2:
         return {
+          label: "GEX Terminal",
           label: "Pinpoint GEX",
           desc: "Live dealer GEX",
           style: "border bg-[var(--surface-2)] border-[var(--border)] text-[var(--text-secondary)]",
@@ -254,6 +255,7 @@ export default function App() {
         };
       case 3:
         return {
+          label: "SkysVision",
           label: "SkyVision",
           desc: "Full terminal access",
           style: "border bg-[var(--surface-3)] border-[var(--border-strong)] text-[var(--text-primary)]",
@@ -262,6 +264,7 @@ export default function App() {
         };
       case 4:
         return {
+          label: "SkysVision",
           label: "SkyVision",
           desc: "Full terminal access",
           style: "border bg-[var(--surface-3)] border-[var(--border-strong)] text-[var(--text-primary)]",
@@ -331,6 +334,8 @@ export default function App() {
 
     const navItems = [
       { id: 'nav-home', name: 'Home Workspace', ticker: 'HOME', pnl: 'Workspace', isNav: true, targetTab: 'home' },
+      { id: 'nav-skyvision', name: 'SkysVision Setup Engine', ticker: 'SKYS', pnl: 'Workspace', isNav: true, targetTab: 'skyvision' },
+      { id: 'nav-pinpoint', name: 'GEX Terminal', ticker: 'GEX', pnl: 'Workspace', isNav: true, targetTab: 'pinpoint' },
       { id: 'nav-skyvision', name: 'SkyVision Cockpit', ticker: 'SKYV', pnl: 'Workspace', isNav: true, targetTab: 'skyvision' },
       { id: 'nav-pinpoint', name: 'Pinpoint GEX', ticker: 'PINP', pnl: 'Workspace', isNav: true, targetTab: 'pinpoint' },
       { id: 'nav-auditor', name: 'Trade History', ticker: 'AUDIT', pnl: 'Workspace', isNav: true, targetTab: 'auditor' },
@@ -890,6 +895,9 @@ export default function App() {
               label={
                 activeTab === 'home' ? 'Home' :
                 activeTab === 'subscription' ? 'Subscriptions' :
+                activeTab === 'skyvision' ? 'SkysVision Setup Engine' :
+                activeTab === 'pinpoint' ? 'GEX Terminal' :
+                activeTab === 'dealerflow' ? 'Dealer Flow' :
                 activeTab === 'skyvision' ? 'SkyVision Cockpit' :
                 activeTab === 'pinpoint' ? 'Pinpoint GEX' :
                 activeTab === 'quant' ? 'Quant Lab' :
@@ -947,6 +955,10 @@ export default function App() {
               </div>
             )}
 
+            {/* TAB 2: SKYSVISION (SETUP / DECISION ENGINE) */}
+            {activeTab === 'skyvision' && (
+              <div className="view-enter">
+                <TierGuard requiredTier={3} tabKey="skyvision" planKey="skyvision" planName="SkysVision" planPrice="$499">
             {/* TAB 2: SKYVISION (DECISION ENGINE) */}
             {activeTab === 'skyvision' && (
               <div className="view-enter">
@@ -956,6 +968,19 @@ export default function App() {
               </div>
             )}
 
+            {/* TAB 3: GEX TERMINAL (MARKET STRUCTURE + DEALER FLOW) */}
+            {activeTab === 'pinpoint' && (
+              <div className="view-enter border border-[var(--border)] bg-[var(--surface)]/90 rounded-md p-1 drop-shadow-2xl">
+                <TierGuard requiredTier={2} tabKey="gex terminal" planKey="pinpoint" planName="GEX Terminal" planPrice="$99">
+                  <DealerFlowView />
+                </TierGuard>
+              </div>
+            )}
+
+
+            {activeTab === 'dealerflow' && (
+              <div className="view-enter border border-[var(--border)] bg-[var(--surface)]/90 rounded-md p-1 drop-shadow-2xl">
+                <TierGuard requiredTier={2} tabKey="dealer flow" planKey="pinpoint" planName="GEX Terminal" planPrice="$99">
             {/* TAB 3: PINPOINT AI (MARKET INTELLIGENCE) */}
             {activeTab === 'pinpoint' && (
               <div className="view-enter border border-[var(--border)] bg-[var(--surface)]/90 rounded-md p-1 drop-shadow-2xl">
@@ -968,6 +993,7 @@ export default function App() {
             {/* TAB: INSTITUTIONAL QUANT LAB */}
             {activeTab === 'quant' && (
               <div className="view-enter border border-[var(--border)] bg-[var(--surface)]/90 rounded-md p-1 drop-shadow-2xl">
+                <TierGuard requiredTier={3} tabKey="quant" planKey="skyvision" planName="SkysVision" planPrice="$499">
                 <TierGuard requiredTier={3} tabKey="quant" planKey="skyvision" planName="SkyVision" planPrice="$499">
                   <QuantSuiteView />
                 </TierGuard>
@@ -977,6 +1003,7 @@ export default function App() {
             {/* TAB 5: AUDIT (TRUST ENGINE) */}
             {activeTab === 'auditor' && (
               <div className="view-enter">
+                <TierGuard requiredTier={3} tabKey="trust archive & registry" planKey="skyvision" planName="SkysVision" planPrice="$499">
                 <TierGuard requiredTier={3} tabKey="trust archive & registry" planKey="skyvision" planName="SkyVision" planPrice="$499">
                   <QuantAuditView
                     selectedAsset={selectedAsset}
@@ -1021,6 +1048,7 @@ export default function App() {
             )}
 
             {/* Defensive fallback: an unknown tab (e.g. corrupt persisted value) never blanks the workspace. */}
+            {!['home', 'subscription', 'skyvision', 'pinpoint', 'dealerflow', 'quant', 'auditor', 'community', 'settings', 'workspace', 'admin'].includes(activeTab) && (
             {!['home', 'subscription', 'skyvision', 'pinpoint', 'quant', 'auditor', 'community', 'settings', 'workspace', 'admin'].includes(activeTab) && (
               <div className="w-full flex-1 flex flex-col items-center justify-center text-center py-24 px-6 select-none">
                 <div className="text-[var(--text-tertiary)] font-mono text-[11px] uppercase tracking-widest mb-3">View not found</div>

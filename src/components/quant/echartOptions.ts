@@ -49,6 +49,7 @@ function ma(period: number, vals: number[][]) {
 export function candleMaVolumeOption(ticker = 'SPY') {
   const { cats, vals, vols } = genOHLC(240);
   return {
+    backgroundColor: '#050507',
     animation: false,
     legend: { top: 2, data: ['Price', 'MA20', 'MA60'], textStyle: { fontSize: 10 } },
     tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
@@ -99,6 +100,7 @@ export function equityCurveOption(echarts: any) {
     base += 24 * 3600 * 1000;
   }
   return {
+    backgroundColor: '#050507',
     tooltip: { trigger: 'axis', position: (pt: number[]) => [pt[0], '10%'] },
     grid: { left: 62, right: 18, top: 18, bottom: 46 },
     xAxis: { type: 'category', boundaryGap: false, data: dates },
@@ -126,6 +128,7 @@ const HEAT = ['#1710c0', '#0b9df0', '#00fea8', '#00ff0d', '#f5f811', '#f09a09', 
 
 export function volSurfaceOption() {
   return {
+    backgroundColor: '#050507',
     tooltip: {},
     visualMap: {
       show: false, dimension: 2, min: -1, max: 1,
@@ -135,6 +138,13 @@ export function volSurfaceOption() {
     yAxis3D: { type: 'value', name: 'Tenor' },
     zAxis3D: { type: 'value', name: 'IV' },
     grid3D: {
+      environment: '#050507',
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.35)' } },
+      axisLabel: { textStyle: { color: '#a1a1aa' } },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.08)' } },
+      axisPointer: { lineStyle: { color: '#4ADE80' } },
+      viewControl: { autoRotate: true, autoRotateSpeed: 8, distance: 200 },
+      light: { main: { intensity: 1.1 }, ambient: { intensity: 0.35 } },
       axisLine: { lineStyle: { color: 'rgba(255,255,255,0.35)' } },
       axisPointer: { lineStyle: { color: '#4ADE80' } },
       viewControl: { autoRotate: true, autoRotateSpeed: 8, distance: 200 },
@@ -166,6 +176,7 @@ export function riskScatter3DOption() {
   }
   const maxSize = Math.max(...data.map(d => d[4]));
   return {
+    backgroundColor: '#050507',
     tooltip: {},
     visualMap: [
       { top: 8, calculable: true, dimension: 3, min: -1000, max: 1000, inRange: { color: HEAT }, textStyle: { color: '#8A8A92' } },
@@ -175,6 +186,10 @@ export function riskScatter3DOption() {
     yAxis3D: { type: 'value', name: 'IV %' },
     zAxis3D: { type: 'value', name: 'Net GEX' },
     grid3D: {
+      environment: '#050507',
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.35)' } },
+      axisLabel: { textStyle: { color: '#a1a1aa' } },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.08)' } },
       axisLine: { lineStyle: { color: 'rgba(255,255,255,0.35)' } },
       axisPointer: { lineStyle: { color: '#4ADE80' } },
       viewControl: { distance: 220 },
@@ -202,6 +217,7 @@ export function dealerFlowFieldOption() {
     }
   }
   return {
+    backgroundColor: '#050507',
     visualMap: {
       show: false, min: vMin, max: vMax, dimension: 4,
       inRange: { color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026'] },

@@ -28,6 +28,7 @@ import { GexReadCard } from './GexReadCard';
 import { ZeroDtePanel } from './ZeroDtePanel';
 import PinpointTerminal from './PinpointTerminal';
 import { DealerFlowMap } from './DealerFlowMap';
+import { StrikeGravityPanel } from './StrikeGravityPanel';
 import { PanelSkeleton } from './PanelSkeleton';
 import {
   Waves,
@@ -1248,6 +1249,15 @@ export function DealerFlowView() {
               </div>
             </div>
             <DealerFlowMap profile={filteredProfile || profile} decimals={selectedAsset.decimals} />
+          </div>
+
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-3 sm:p-5" id="strike-gravity-gex-panel">
+            <div className="flex items-center gap-2 text-[9px] font-black tracking-widest uppercase mb-4 text-[var(--success)]">
+              <Crosshair className="w-3.5 h-3.5" />
+              <span className="text-[var(--text-secondary)]">Strike Gravity / Walls</span>
+              <span className="text-[var(--text-tertiary)] font-normal normal-case tracking-normal">· GEX support, resistance, and dealer flip context</span>
+            </div>
+            <StrikeGravityPanel />
           </div>
 
           {/* ============== MAIN GRID (THE CHOSEN ORIGINAL 3-COLUMN LAYOUT) ============== */}

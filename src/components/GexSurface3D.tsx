@@ -50,6 +50,7 @@ export function GexSurface3D({ expiries, spot, decimals = 0, ticker, live, windo
   const [hover, setHover] = useState<HoverInfo | null>(null);
   const [slicing, setSlicing] = useState(false);
   const [sliceFrac, setSliceFrac] = useState(0.5);
+  const [renderError, setRenderError] = useState<string | null>(null);
 
   // ---- Build the (strike × expiry) gamma grid from real data ----
   const grid = useMemo(() => {
@@ -79,6 +80,14 @@ export function GexSurface3D({ expiries, spot, decimals = 0, ticker, live, windo
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount || !grid) return;
+    setRenderError(null);
+    mount.querySelectorAll('canvas').forEach((canvas) => canvas.remove());
+
+    const width = Math.max(320, mount.clientWidth || 800);
+    const height = Math.max(260, mount.clientHeight || 460);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050507);
 
     const width = mount.clientWidth || 800;
     const height = mount.clientHeight || 460;
@@ -89,6 +98,7 @@ export function GexSurface3D({ expiries, spot, decimals = 0, ticker, live, windo
 
     // preserveDrawingBuffer lets us snapshot the canvas to PNG on demand.
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setClearColor(0x050507, 1);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(width, height);
     mount.appendChild(renderer.domElement);
@@ -219,6 +229,22 @@ export function GexSurface3D({ expiries, spot, decimals = 0, ticker, live, windo
     renderer.domElement.addEventListener('pointermove', onMove);
     renderer.domElement.addEventListener('pointerleave', onLeave);
 
+    const animate = () => {
+      raf = requestAnimationFrame(animate);
+      try {
+        controls.update();
+        renderer.render(scene, camera);
+      } catch (err) {
+        setRenderError(err instanceof Error ? err.message : 'Unknown WebGL render failure');
+        cancelAnimationFrame(raf);
+      }
+    };
+    animate();
+
+    const onResize = () => {
+      const w = Math.max(320, mount.clientWidth || width), h = Math.max(260, mount.clientHeight || height);
+      if (!Number.isFinite(w) || !Number.isFinite(h)) return;
+      camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
     const animate = () => { raf = requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); };
     animate();
 
@@ -317,6 +343,13 @@ export function GexSurface3D({ expiries, spot, decimals = 0, ticker, live, windo
         </div>
       </div>
 
+      <div ref={mountRef} className="relative w-full h-[440px] cursor-grab active:cursor-grabbing bg-zinc-950" style={{ touchAction: 'none', background: '#050507' }}>
+        {renderError && (
+          <div className="absolute inset-0 z-20 flex flex-col justify-center rounded-xl border border-red-500/20 bg-red-950/10 p-4">
+            <p className="text-sm font-medium text-red-300">Quant model failed to render</p>
+            <p className="mt-1 text-xs text-red-200/60">{renderError}</p>
+          </div>
+        )}
       <div ref={mountRef} className="relative w-full h-[440px] cursor-grab active:cursor-grabbing" style={{ touchAction: 'none' }}>
         {hover && (
           <div

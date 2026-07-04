@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useEffect, useRef } from 'react';
 
 /**
@@ -73,6 +74,29 @@ export default function EChart({ option, gl, className, style, notMerge, onInit 
   const elRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<any>(null);
   const echartsRef = useRef<EChartsModule | null>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'empty' | 'error'>('loading');
+  const [message, setMessage] = useState<string>('');
+  const optionRef = useRef<OptionOrFactory>(option);
+  optionRef.current = option;
+
+  const hasRenderableSeries = (resolved: any) => {
+    const series = Array.isArray(resolved?.series) ? resolved.series : resolved?.series ? [resolved.series] : [];
+    if (!series.length) return false;
+    return series.some((s: any) => s?.equation || s?.type === 'flowGL' || (Array.isArray(s?.data) && s.data.length > 0));
+  };
+
+  const terminalOption = useMemo(() => ({
+    backgroundColor: '#050507',
+    textStyle: { color: '#d4d4d8', fontFamily: 'JetBrains Mono, ui-monospace, monospace' },
+    grid3D: {
+      environment: '#050507',
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.32)' } },
+      axisLabel: { textStyle: { color: '#a1a1aa' } },
+      axisPointer: { lineStyle: { color: '#4ade80' } },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.08)' } },
+    },
+  }), []);
+
   const optionRef = useRef<OptionOrFactory>(option);
   optionRef.current = option;
 
@@ -85,6 +109,28 @@ export default function EChart({ option, gl, className, style, notMerge, onInit 
       if (gl) await import('echarts-gl');
       if (disposed || !elRef.current) return;
       registerSlayerTheme(echarts);
+      const chart = echarts.init(elRef.current, 'slayer-dark', { renderer: 'canvas', useDirtyRect: true });
+      echartsRef.current = echarts;
+      chartRef.current = chart;
+      try {
+        const resolved = typeof optionRef.current === 'function' ? optionRef.current(echarts) : optionRef.current;
+        if (!hasRenderableSeries(resolved)) {
+          setStatus('empty');
+          setMessage('No chart series/data were provided to the renderer.');
+        } else {
+          chart.setOption({ ...terminalOption, ...resolved }, { notMerge: true });
+          setStatus('ready');
+        }
+        onInit?.(chart, echarts);
+      } catch (err) {
+        setStatus('error');
+        setMessage(err instanceof Error ? err.message : 'Unknown chart renderer error');
+      }
+      ro = new ResizeObserver((entries) => {
+        const rect = entries[0]?.contentRect;
+        if (!rect || rect.width <= 0 || rect.height <= 0 || !Number.isFinite(rect.width) || !Number.isFinite(rect.height)) return;
+        chart.resize();
+      });
       const chart = echarts.init(elRef.current, 'slayer-dark', { renderer: 'canvas' });
       echartsRef.current = echarts;
       chartRef.current = chart;
@@ -102,6 +148,7 @@ export default function EChart({ option, gl, className, style, notMerge, onInit 
       echartsRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gl, terminalOption]);
   }, [gl]);
 
   // Apply option updates once the chart exists.
@@ -109,6 +156,44 @@ export default function EChart({ option, gl, className, style, notMerge, onInit 
     const chart = chartRef.current;
     const echarts = echartsRef.current;
     if (!chart || !echarts) return;
+    try {
+      const resolved = typeof option === 'function' ? option(echarts) : option;
+      if (!hasRenderableSeries(resolved)) {
+        setStatus('empty');
+        setMessage('Waiting for valid chart data.');
+        chart.clear();
+        return;
+      }
+      chart.setOption({ ...terminalOption, ...resolved }, { notMerge: notMerge ?? false });
+      setStatus('ready');
+    } catch (err) {
+      setStatus('error');
+      setMessage(err instanceof Error ? err.message : 'Unknown chart renderer error');
+      chart.clear();
+    }
+  }, [option, notMerge, terminalOption]);
+
+  return (
+    <div className={`relative h-full w-full overflow-hidden bg-zinc-950 ${className ?? ''}`} style={style}>
+      <div ref={elRef} style={{ width: '100%', height: '100%', background: '#050507' }} />
+      {status === 'loading' && (
+        <div className="absolute inset-0 rounded-xl border border-white/10 bg-zinc-950 p-4">
+          <div className="mb-3 h-4 w-48 animate-pulse rounded bg-white/10" />
+          <div className="h-[calc(100%-2rem)] animate-pulse rounded-xl bg-white/[0.04]" />
+        </div>
+      )}
+      {(status === 'empty' || status === 'error') && (
+        <div className={`absolute inset-0 flex flex-col justify-center rounded-xl border p-4 ${status === 'error' ? 'border-red-500/20 bg-red-950/10' : 'border-white/10 bg-zinc-950'}`}>
+          <p className={`text-sm font-medium ${status === 'error' ? 'text-red-300' : 'text-zinc-300'}`}>
+            {status === 'error' ? 'Quant model failed to render' : 'No surface data available'}
+          </p>
+          <p className={`mt-1 text-xs ${status === 'error' ? 'text-red-200/60' : 'text-zinc-600'}`}>
+            {message || (status === 'error' ? 'Check data source, surface dimensions, and renderer lifecycle.' : 'Waiting for valid moneyness, tenor, and volatility inputs.')}
+          </p>
+        </div>
+      )}
+    </div>
+  );
     const resolved = typeof option === 'function' ? option(echarts) : option;
     chart.setOption(resolved, { notMerge: notMerge ?? false });
   }, [option, notMerge]);
