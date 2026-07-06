@@ -12,7 +12,7 @@ auth/billing persistence) **Postgres**. See `DEPLOY.md` for the full deploy guid
 
 ## Run locally
 
-**Prerequisites:** Node.js 22+
+**Prerequisites:** Node.js 20–22 (CI uses Node.js 22)
 
 ```bash
 npm install
@@ -31,6 +31,21 @@ go live (see `.env.example`):
 
 - `npm run dev` — run the server (API + frontend) in development
 - `npm run build` — build the frontend (Vite) and bundle the server (esbuild)
+- `npm run ci:verify` — run the exact merge-readiness gate: typecheck, tests, then build
 - `npm start` — run the production bundle (`dist/server.cjs`)
 - `npm run lint` — TypeScript typecheck (`tsc --noEmit`)
 - `npm test` — run the quant + SkyScore test suites
+
+## Before merging to GitHub
+
+Use the same dependency install path as GitHub Actions, then run the single
+verification command:
+
+```bash
+npm ci
+npm run ci:verify
+```
+
+This mirrors `.github/workflows/ci.yml`, which installs from `package-lock.json`
+and runs typecheck, the logic/unit suites, and the production bundle build before
+the branch is considered merge-ready.
