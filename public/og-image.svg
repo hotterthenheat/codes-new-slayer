@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Slayer Terminal — Institutional Options Intelligence</title>
+  <desc id="desc">Social preview card for Slayer Terminal with neon market-grid styling.</desc>
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="45%" r="70%">
+      <stop offset="0%" stop-color="#1df2ff" stop-opacity="0.28"/>
+      <stop offset="45%" stop-color="#7c3cff" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#050507" stop-opacity="1"/>
+    </radialGradient>
+    <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="52%" stop-color="#b46cff"/>
+      <stop offset="100%" stop-color="#ff2bd6"/>
+    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0v48" fill="none" stroke="#ffffff" stroke-opacity="0.06"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#050507"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <g fill="none" stroke-linecap="round" opacity="0.6">
+    <path d="M92 448C176 392 226 418 296 354s130-24 196-84 119-42 172-4 92 18 150-52 154-44 288 8" stroke="#00f5ff" stroke-width="5"/>
+    <path d="M92 493c96-34 157-10 241-54s129-13 201-44 126-17 205 19 164 15 363-75" stroke="#ff2bd6" stroke-width="3"/>
+  </g>
+  <rect x="88" y="82" width="1024" height="466" rx="36" fill="#0a0a0f" fill-opacity="0.82" stroke="url(#stroke)" stroke-width="2"/>
+  <text x="126" y="245" fill="#ffffff" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="78" font-weight="900" letter-spacing="-3">Slayer Terminal</text>
+  <text x="130" y="315" fill="#d9f8ff" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="34" font-weight="700">Institutional Options Intelligence</text>
+  <text x="132" y="405" fill="#00f5ff" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="24" font-weight="800">GEX / DEX / VEX • Gamma Flip • Expected Move</text>
+</svg>
